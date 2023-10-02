@@ -2,8 +2,7 @@ const app = require('../server')
 const request = require('supertest')
 let userid
 
-
-describe('userRouter', () => {
+describe('user test suite',()=>{
     it('POST', async () => {
         const username = 'test'
         const password = 'test'
@@ -15,8 +14,6 @@ describe('userRouter', () => {
         userid=response.body.data.id
         expect(response.body.data.username).toBe(username);
     });
-});
-describe('userRouter', () => {
     it('PUT', async () => {
         const username = 'test'
         const password = 'test2'
@@ -27,8 +24,6 @@ describe('userRouter', () => {
         expect(response.status).toBe(200);
         expect(response.body.data[0]).toBe(1)
     });
-});
-describe('userRouter', () => {
     it('user GET', async () => {
         const username='test'
         const response = await request(app)
@@ -38,8 +33,6 @@ describe('userRouter', () => {
         expect(response.status).toBe(200);
         expect(response.body.data.username).toBe(username);
     });
-});
-describe('userRouter', () => {
     test('DELETE', async () => {
         const username='test'
         const response = await request(app)
@@ -48,5 +41,6 @@ describe('userRouter', () => {
         expect(response.status).toBe(200);
         expect(response.body.data).toBe(1)
     });
-});
+})
+
 
