@@ -12,6 +12,21 @@ const userGetServices=async (req,res)=>{
 
     }
 }
+const userControllerServices=async (req,res)=>{
+    try {
+        const {username}=req.body
+        const json =await User.findOne({where:{username}})
+        if (json===null){
+            return true
+        }else{
+            return false
+        }
+    }catch (e) {
+        console.log('e',e)
+        throw e
+
+    }
+}
 const createUserServices=async (req,res)=>{
     try {
         const {username,password}=req.body
@@ -48,5 +63,5 @@ const deleteUserServices=async (req,res)=>{
 
 
 module.exports = {
-    userGetServices,createUserServices,putUserServices,deleteUserServices
+    userGetServices,createUserServices,putUserServices,deleteUserServices,userControllerServices
 }
