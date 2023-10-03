@@ -1,8 +1,11 @@
 const app = require('../server')
 const request = require('supertest')
 const {NO_USER, NO_PASSWORD, PASSWORD_NO_RULE, USER_CONTROL_ERROR, USER_CONTROL_NULL_ERROR} = require("../errorsMessage/userErrorMessages");
+const User=require('../models/user')
+const {userGetServices, userControllerServices, createUserServices, putUserServices, deleteUserServices}=require('../services/userServices')
+const db = require('../db/helper')
 let userid
-describe('user test suite',()=>{
+describe('user control test suite',()=>{
     describe('user Post suite',()=>{
         it('POST', async () => {
             const username = 'test'
@@ -150,5 +153,130 @@ describe('user test suite',()=>{
             expect(response.body.data).toBe(1)
         });
     })
+})
+const mockErrorFunction = jest.fn(() => {
+    throw new Error('Test hatası');
+});
+describe('user services test suite',()=>{
+    it('userGet function services test', async () => {
+        const req = { body: { username: 'test' } };
+        User.findOne = mockErrorFunction;
+        try {
+            await userGetServices(req);
+        } catch (e) {
+            console.log('eeeeee',e)
+            expect(e.message).toBe('Test hatası');
+        }
+    });
+    it('usercontrol function services test', async () => {
+        const req = { body: { username: 'test' } };
+        User.findOne = mockErrorFunction;
+        try {
+            await userControllerServices(req);
+        } catch (e) {
+            console.log('eeeeee',e)
+            expect(e.message).toBe('Test hatası');
+        }
+    });
+    it('createuser function services test', async () => {
+        const req = { body: { username: 'test',password:'test' } };
+        User.create = mockErrorFunction;
+        try {
+            await createUserServices(req);
+        } catch (e) {
+            console.log('eeeeee',e)
+            expect(e.message).toBe('Test hatası');
+        }
+    });
+    it('putUser function services test', async () => {
+        const req = { body: { username: 'test',password:'test' } };
+        User.update = mockErrorFunction;
+        try {
+            await putUserServices(req);
+        } catch (e) {
+            console.log('eeeeee',e)
+            expect(e.message).toBe('Test hatası');
+        }
+    });
+    it('delete function services test', async () => {
+        const req = { body: { username: 'test' } };
+        User.destroy = mockErrorFunction;
+        try {
+            await deleteUserServices(req);
+        } catch (e) {
+            console.log('eeeeee',e)
+            expect(e.message).toBe('Test hatası');
+        }
+    });
+    it('User.update ve transaction işlemi test', async () => {
+        const req = { body: { username: 'test' } };
+        const fakeUserUpdateResult = {  };
+
+        User.update = jest.fn().mockResolvedValue(fakeUserUpdateResult);
+
+        const result = await putUserServices(req);
+        expect(result).toEqual(fakeUserUpdateResult);
+    });
+
+
+})
+describe('helper test suite',()=>{
+    it('connect catch test', async () => {
+        const mockError = new Error('Test hatası');
+
+        db.sequelize.authenticate = jest.fn().mockRejectedValue(mockError);
+
+        try {
+            await db.connect();
+        } catch (error) {
+            expect(error).toBe(mockError);
+        }
+    });
+    test('db.createTable işlemi başarılı olmalı ve tablo mevcut olmalı', async () => {
+        await db.createTable();
+
+        // Tablonun veritabanında mevcut olduğunu kontrol etmek için bir sorgu yapın
+        const sequelize = db.sequelize;
+        const queryInterface = sequelize.getQueryInterface();
+        const tableExists = await queryInterface.showAllTables();
+
+        const userTableExists = tableExists.includes('users');
+        expect(userTableExists).toBe(true);
+    });
+    test('db.dbQueryAndCreate işlemi başarılı olmalı ve veritabanı mevcut olmalı', async () => {
+        const mockSequelizetest = {
+            query: jest.fn(),
+        };
+        const mockDatabaseExistsResult = [];
+
+        // `db.sequelizetest` yerine doğrudan `sequelize` üzerinden mock kullanın
+        db.sequelize = mockSequelizetest;
+
+        // `mockSequelizetest.query` işlevini sırasıyla ayarlayın
+        mockSequelizetest.query
+            .mockResolvedValueOnce(mockDatabaseExistsResult) // Veritabanı yoksa
+            .mockResolvedValueOnce([{ datname: 'testCodeUser' }]); // Veritabanı mevcutsa
+
+        // `db.createTable` işlemini mocklayın
+        db.createTable = jest.fn().mockResolvedValue();
+
+        // db.dbQueryAndCreate işlemini çağırın
+        await db.dbQueryAndCreate();
+
+        // Veritabanının varlığını kontrol etmek için gerekli sorgunun çağrıldığını doğrulayın
+        // expect(mockSequelizetest.query).toHaveBeenCalledWith(
+        //     `SELECT 1 FROM pg_database WHERE datname = 'testCodeUser'`,
+        //     expect.any(Object) // Query options bekleniyor, bu nedenle burada isteğe bağlı bir kontrol kullanıyoruz.
+        // );
+
+        // Veritabanının varlığını kontrol ederken başarılı bir şekilde oluşturulduysa, createTable işleminin çağrıldığını doğrulayın
+
+        // Veritabanı zaten mevcutsa ilgili mesajın yazıldığını kontrol edin
+        expect(console.log).toHaveBeenCalledWith('Veritabanı zaten mevcut.');
+
+        // Veritabanı oluşturulurken veya hata alırken ilgili mesajların yazıldığını kontrol edin
+        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Veritabanı ve tablolar başarıyla oluşturuldu veya mevcuttu.'));
+        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Veritabanı oluşturma hatası:'));
+    });
 })
 
