@@ -1,7 +1,8 @@
 const User= require('../models/user')
-
+const db=require('../db/helper')
 
 const userGetServices=async (req,res)=>{
+
     try {
         const {username}=req.body
         const json =await User.findOne({where:{username}})
@@ -28,33 +29,45 @@ const userControllerServices=async (req,res)=>{
     }
 }
 const createUserServices=async (req,res)=>{
+    let transaction=null
     try {
+        transaction=await db.sequelize.transaction()
         const {username,password}=req.body
         const json =await User.create({username,password})
+        await transaction.commit()
         return json
     }catch (e) {
+        await transaction.rollback()
         console.log('e',e)
         throw e
 
     }
 }
 const putUserServices=async (req,res)=>{
+    let transaction=null
     try {
+        transaction=await db.sequelize.transaction()
         const {username,password}=req.body
         const json =await User.update({password:password},{where:{username}})
+        await transaction.commit()
         return json
     }catch (e) {
+        await transaction.rollback()
         console.log('e',e)
         throw e
 
     }
 }
 const deleteUserServices=async (req,res)=>{
+    let transaction=null
     try {
+        transaction=await db.sequelize.transaction()
         const {username}=req.body
         const json =await User.destroy({where:{username}})
+        await transaction.commit()
         return json
     }catch (e) {
+        await transaction.rollback()
         console.log('e',e)
         throw e
 
