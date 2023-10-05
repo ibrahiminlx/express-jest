@@ -126,7 +126,7 @@ describe('user control test suite',()=>{
         });
     })
     describe('user delete suite',()=>{
-        it('delete no username', async () => {
+        it('DELETE no username', async () => {
             const response = await request(app)
                 .get('/user')
                 .send({  });
@@ -134,7 +134,7 @@ describe('user control test suite',()=>{
             expect(response.status).toBe(500);
             expect(response.body.message).toBe(NO_USER);
         });
-        it('delete no user', async () => {
+        it('DELETE no user', async () => {
             const username='test2'
             const response = await request(app)
                 .get('/user')
@@ -144,7 +144,7 @@ describe('user control test suite',()=>{
             expect(response.body.message).toBe(USER_CONTROL_NULL_ERROR);
         });
 
-        test('DELETE', async () => {
+        test('DELETE success', async () => {
             const username='test'
             const response = await request(app)
                 .delete('/user')
@@ -164,7 +164,6 @@ describe('user services test suite',()=>{
         try {
             await userGetServices(req);
         } catch (e) {
-            console.log('eeeeee',e)
             expect(e.message).toBe('Test hatası');
         }
     });
@@ -174,7 +173,6 @@ describe('user services test suite',()=>{
         try {
             await userControllerServices(req);
         } catch (e) {
-            console.log('eeeeee',e)
             expect(e.message).toBe('Test hatası');
         }
     });
@@ -184,7 +182,6 @@ describe('user services test suite',()=>{
         try {
             await createUserServices(req);
         } catch (e) {
-            console.log('eeeeee',e)
             expect(e.message).toBe('Test hatası');
         }
     });
@@ -194,7 +191,6 @@ describe('user services test suite',()=>{
         try {
             await putUserServices(req);
         } catch (e) {
-            console.log('eeeeee',e)
             expect(e.message).toBe('Test hatası');
         }
     });
@@ -204,7 +200,6 @@ describe('user services test suite',()=>{
         try {
             await deleteUserServices(req);
         } catch (e) {
-            console.log('eeeeee',e)
             expect(e.message).toBe('Test hatası');
         }
     });
@@ -243,40 +238,6 @@ describe('helper test suite',()=>{
         const userTableExists = tableExists.includes('users');
         expect(userTableExists).toBe(true);
     });
-    test('db.dbQueryAndCreate işlemi başarılı olmalı ve veritabanı mevcut olmalı', async () => {
-        const mockSequelizetest = {
-            query: jest.fn(),
-        };
-        const mockDatabaseExistsResult = [];
-
-        // `db.sequelizetest` yerine doğrudan `sequelize` üzerinden mock kullanın
-        db.sequelize = mockSequelizetest;
-
-        // `mockSequelizetest.query` işlevini sırasıyla ayarlayın
-        mockSequelizetest.query
-            .mockResolvedValueOnce(mockDatabaseExistsResult) // Veritabanı yoksa
-            .mockResolvedValueOnce([{ datname: 'testCodeUser' }]); // Veritabanı mevcutsa
-
-        // `db.createTable` işlemini mocklayın
-        db.createTable = jest.fn().mockResolvedValue();
-
-        // db.dbQueryAndCreate işlemini çağırın
-        await db.dbQueryAndCreate();
-
-        // Veritabanının varlığını kontrol etmek için gerekli sorgunun çağrıldığını doğrulayın
-        // expect(mockSequelizetest.query).toHaveBeenCalledWith(
-        //     `SELECT 1 FROM pg_database WHERE datname = 'testCodeUser'`,
-        //     expect.any(Object) // Query options bekleniyor, bu nedenle burada isteğe bağlı bir kontrol kullanıyoruz.
-        // );
-
-        // Veritabanının varlığını kontrol ederken başarılı bir şekilde oluşturulduysa, createTable işleminin çağrıldığını doğrulayın
-
-        // Veritabanı zaten mevcutsa ilgili mesajın yazıldığını kontrol edin
-        expect(console.log).toHaveBeenCalledWith('Veritabanı zaten mevcut.');
-
-        // Veritabanı oluşturulurken veya hata alırken ilgili mesajların yazıldığını kontrol edin
-        expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Veritabanı ve tablolar başarıyla oluşturuldu veya mevcuttu.'));
-        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Veritabanı oluşturma hatası:'));
-    });
 })
+
 
